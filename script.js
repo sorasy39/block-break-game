@@ -6,11 +6,11 @@ const startButton = document.getElementById("startButton");
 // デバイスごとのキャンバスサイズ設定
 function resizeCanvas() {
     if (window.innerWidth > 800) {
-        canvas.width = 800;
-        canvas.height = 600;
+        canvas.width = 700; // サイズを少し小さく
+        canvas.height = 500; // サイズを少し小さく
     } else {
-        canvas.width = window.innerWidth * 0.9;
-        canvas.height = window.innerHeight * 0.7;
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.7; // 少し小さく
     }
 }
 window.addEventListener("resize", resizeCanvas);
@@ -18,7 +18,7 @@ resizeCanvas();
 
 // ゲーム設定
 let ballRadius, x, y, dx, dy;
-let paddleHeight = 15;
+let paddleHeight = 12; // パドル高さを少し小さく
 let paddleWidth;
 let paddleX;
 let rightPressed = false;
@@ -30,20 +30,20 @@ const acceleration = 0.02;
 const maxSpeed = 10;
 
 // ブロック設定
-const rowCount = window.innerWidth > 800 ? 6 : 4;
-const columnCount = window.innerWidth > 800 ? 10 : 6;
+const rowCount = window.innerWidth > 800 ? 5 : 4;
+const columnCount = window.innerWidth > 800 ? 8 : 5;
 let blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
 let blocks = [];
 
 // 初期化
 function initGame() {
     resizeCanvas();
-    ballRadius = canvas.width * 0.015;
-    paddleWidth = canvas.width * 0.2;
+    ballRadius = canvas.width * 0.012; // ボールを小さく
+    paddleWidth = canvas.width * 0.15; // パドルを少し小さく
     paddleX = (canvas.width - paddleWidth) / 2;
 
     x = canvas.width / 2;
-    y = canvas.height - 40;
+    y = canvas.height - 30; // 少し上げてスペース確保
     speed = 4; // 速度をリセット
     let angle = (Math.random() * 60 + 30) * (Math.PI / 180);
     dx = Math.cos(angle) * speed * (Math.random() < 0.5 ? 1 : -1);
@@ -54,9 +54,9 @@ function initGame() {
     restartButton.style.display = "none";
 
     blockWidth = canvas.width / columnCount - 10;
-    blockHeight = 25;
-    blockPadding = 10;
-    blockOffsetTop = 60;
+    blockHeight = 20; // ブロックを少し小さく
+    blockPadding = 8;
+    blockOffsetTop = 50;
     blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
 
     blocks = [];
@@ -88,8 +88,8 @@ function keyUpHandler(e) {
 
 // スムーズなパドル移動
 function movePaddle() {
-    if (rightPressed) paddleX += 7;
-    if (leftPressed) paddleX -= 7;
+    if (rightPressed) paddleX += 5; // パドルを少し速く
+    if (leftPressed) paddleX -= 5; // パドルを少し速く
     paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, paddleX));
 }
 
@@ -105,7 +105,7 @@ canvas.addEventListener("touchmove", function(e) {
 // パドル描画
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, canvas.height - paddleHeight - 20, paddleWidth, paddleHeight); // 少し上に位置調整
     ctx.fillStyle = "#00b3b3";
     ctx.fill();
     ctx.closePath();
@@ -176,7 +176,7 @@ function draw() {
 
     if (gameOver) {
         ctx.fillStyle = "#ff6347";
-        ctx.font = "40px Arial";
+        ctx.font = "30px Arial"; // フォントサイズを小さく
         ctx.textAlign = "center";
         ctx.fillText("ゲームオーバー", canvas.width / 2, canvas.height / 2);
         restartButton.style.display = "block";
@@ -185,7 +185,7 @@ function draw() {
 
     if (gameClear) {
         ctx.fillStyle = "#00ff00";
-        ctx.font = "40px Arial";
+        ctx.font = "30px Arial"; // フォントサイズを小さく
         ctx.textAlign = "center";
         ctx.fillText("ゲームクリア！", canvas.width / 2, canvas.height / 2);
         restartButton.style.display = "block";
@@ -208,7 +208,7 @@ function draw() {
     if (y + dy < ballRadius) {
         dy = -dy;
         increaseSpeed();
-    } else if (y + dy > canvas.height - ballRadius - paddleHeight) {
+    } else if (y + dy > canvas.height - ballRadius - paddleHeight - 20) { // 位置調整
         if (x > paddleX && x < paddleX + paddleWidth) {
             let hitPoint = (x - paddleX) / paddleWidth - 0.5;
             let newAngle = hitPoint * Math.PI / 3;
