@@ -10,8 +10,8 @@ function resizeCanvas() {
         canvas.width = 700; // サイズを少し小さく
         canvas.height = 500; // サイズを少し小さく
     } else {
-        canvas.width = window.innerWidth * 1;
-        canvas.height = window.innerHeight * 1; // 少し小さく
+        canvas.width = window.innerWidth * 0.6;
+        canvas.height = window.innerHeight * 0.8; // 少し小さく
     }
 }
 window.addEventListener("resize", resizeCanvas);
