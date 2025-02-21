@@ -71,12 +71,12 @@ body {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 300px) {
     .game-title {
-        font-size: 24px;
+        font-size: 30px;
     }
     #gameCanvas {
-        width: 100%;
+        width: 50%;
     }
     #startButton, #restartButton {
         font-size: 14px;
@@ -84,7 +84,7 @@ body {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 200px) {
     .game-title {
         font-size: 20px;
     }
