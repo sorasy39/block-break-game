@@ -1,21 +1,7 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const restartButton = document.getElementById("restartButton");
 const startButton = document.getElementById("startButton");
-
-// デバイスごとのキャンバスサイズ設定
-function resizeCanvas() {
-    if (window.innerWidth > 800) {
-        canvas.width = 700; // サイズを少し小さく
-        canvas.height = 500; // サイズを少し小さく
-    } else {
-        canvas.width = window.innerWidth * 0.2;
-        canvas.height = window.innerHeight * 0.4; // 少し小さく
-    }
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
 
 // ゲーム設定
 let ballRadius, x, y, dx, dy;
@@ -31,10 +17,40 @@ const acceleration = 0.02;
 const maxSpeed = 10;
 
 // ブロック設定
-const rowCount = window.innerWidth > 800 ? 5 : 4;
-const columnCount = window.innerWidth > 800 ? 8 : 5;
-let blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
+let rowCount, columnCount, blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
 let blocks = [];
+
+// デバイスごとのキャンバスサイズ設定
+function resizeCanvas() {
+    if (window.innerWidth > 800) {
+        canvas.width = 700;
+        canvas.height = 500;
+        rowCount = 5; // 大きい画面用ブロック行数
+        columnCount = 8; // 大きい画面用ブロック列数
+    } else {
+        canvas.width = window.innerWidth * 0.2; // スマホ向けに調整
+        canvas.height = window.innerHeight * 0.3; // スマホ向けに調整
+        rowCount = 4; // 小さい画面用ブロック行数
+        columnCount = 5; // 小さい画面用ブロック列数
+    }
+
+    // パドルの高さと幅を変更（画面幅に合わせて調整）
+    paddleHeight = canvas.height * 0.05;
+    paddleWidth = canvas.width * 0.3; // スマホではパドルを大きめに
+
+    // 玉の速さを画面サイズに合わせて調整
+    speed = Math.min(canvas.width * 0.004, 6); // 画面サイズに比例して速さを設定
+    ballRadius = canvas.width * 0.015; // ボールのサイズも調整
+
+    paddleX = (canvas.width - paddleWidth) / 2; // パドルの初期位置
+
+    // ブロック設定
+    blockWidth = canvas.width / columnCount - 10;
+    blockHeight = 20; // ブロックを少し小さく
+    blockPadding = 8;
+    blockOffsetTop = 50;
+    blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
+}
 
 // 初期化
 function initGame() {
@@ -53,12 +69,6 @@ function initGame() {
     gameOver = false;
     gameClear = false;
     restartButton.style.display = "none";
-
-    blockWidth = canvas.width / columnCount - 10;
-    blockHeight = 20; // ブロックを少し小さく
-    blockPadding = 8;
-    blockOffsetTop = 50;
-    blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
 
     blocks = [];
     for (let r = 0; r < rowCount; r++) {
