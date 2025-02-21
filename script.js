@@ -58,8 +58,8 @@ function resizeCanvas() {
         canvas.width = 700;
         canvas.height = 500;
     } else {
-        canvas.width = window.innerWidth * 0.8; // スマホ向けに調整
-        canvas.height = window.innerHeight * 0.7; // スマホ向けに調整
+        canvas.width = window.innerWidth * 0.2; // スマホ向けに調整
+        canvas.height = window.innerHeight * 0.3; // スマホ向けに調整
     }
     
     // パドルの高さと幅を変更（画面幅に合わせて調整）
