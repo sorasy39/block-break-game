@@ -11,7 +11,7 @@ function resizeCanvas() {
         canvas.height = 500; // サイズを少し小さく
     } else {
         canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.6; // 少し小さく
+        canvas.height = window.innerHeight * 0.7; // 少し小さく
     }
 }
 window.addEventListener("resize", resizeCanvas);
