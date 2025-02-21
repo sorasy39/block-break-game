@@ -3,36 +3,41 @@ const ctx = canvas.getContext("2d");
 const restartButton = document.getElementById("restartButton");
 const startButton = document.getElementById("startButton");
 
-// キャンバスサイズを画面サイズに適応
+// デバイスごとのキャンバスサイズ設定
 function resizeCanvas() {
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = window.innerHeight * 0.7;
+    if (window.innerWidth > 800) {
+        // PC用（固定サイズ）
+        canvas.width = 800;
+        canvas.height = 600;
+    } else {
+        // スマホ用（画面サイズに適応）
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.7;
+    }
 }
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-// ボールの設定
-let ballRadius = 12;
+// ボール設定
+let ballRadius = canvas.width * 0.015; // 画面サイズに依存
 let x, y, dx, dy;
 
-// パドルの設定
-const paddleHeight = 20;
-const paddleWidth = canvas.width * 0.2; // パドル幅を画面サイズに依存
+// パドル設定（画面サイズに応じて変化）
+const paddleHeight = 15;
+let paddleWidth = canvas.width * 0.2;
 let paddleX;
-let rightPressed = false;
-let leftPressed = false;
 
 // ゲーム状態
 let gameOver = false;
 let gameClear = false;
 
-// ブロック設定
-const rowCount = 6;
-const columnCount = 10;
+// ブロック設定（PCとスマホで異なるバランス）
+const rowCount = window.innerWidth > 800 ? 6 : 4;
+const columnCount = window.innerWidth > 800 ? 10 : 6;
 const blockWidth = canvas.width / columnCount - 10;
 const blockHeight = 25;
 const blockPadding = 10;
-const blockOffsetTop = 80;
+const blockOffsetTop = 60;
 const blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
 
 let blocks = [];
@@ -41,9 +46,11 @@ let blocks = [];
 let speed = 4;
 const acceleration = 0.02;
 
-// 初期化関数
+// 初期化
 function initGame() {
-    resizeCanvas(); // キャンバスサイズ更新
+    resizeCanvas(); // サイズを更新
+    ballRadius = canvas.width * 0.015; // 再計算
+    paddleWidth = canvas.width * 0.2; // パドルサイズも更新
     x = canvas.width / 2;
     y = canvas.height - 40;
 
@@ -69,7 +76,7 @@ function initGame() {
     }
 }
 
-// ゲームスタートボタンを押した時の処理
+// スタートボタン
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none';
     initGame();
@@ -80,33 +87,27 @@ startButton.addEventListener('click', () => {
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
-// タッチ操作でパドルを動かす
+// タッチ操作（スマホ）
 canvas.addEventListener("touchmove", function(e) {
     let touchX = e.touches[0].clientX - canvas.offsetLeft;
     if (touchX > 0 && touchX < canvas.width) {
         paddleX = touchX - paddleWidth / 2;
     }
-    e.preventDefault(); // スクロール防止
+    e.preventDefault();
 });
 
-// リスタートボタンを押した時の処理
+// リスタートボタン
 restartButton.addEventListener("click", restartGame);
 
 function keyDownHandler(e) {
     if (e.key === "Right" || e.key === "ArrowRight") {
-        rightPressed = true;
+        paddleX += 20;
     } else if (e.key === "Left" || e.key === "ArrowLeft") {
-        leftPressed = true;
+        paddleX -= 20;
     }
 }
 
-function keyUpHandler(e) {
-    if (e.key === "Right" || e.key === "ArrowRight") {
-        rightPressed = false;
-    } else if (e.key === "Left" || e.key === "ArrowLeft") {
-        leftPressed = false;
-    }
-}
+function keyUpHandler(e) {}
 
 // パドルの描画
 function drawPaddle() {
@@ -139,7 +140,7 @@ function drawBlocks() {
     }
 }
 
-// ブロックとボールの衝突判定
+// ブロックとの衝突判定
 function collisionDetection() {
     for (let r = 0; r < rowCount; r++) {
         for (let c = 0; c < columnCount; c++) {
@@ -156,7 +157,7 @@ function collisionDetection() {
     }
 }
 
-// 速度を増やす関数
+// 速度アップ
 function increaseSpeed() {
     let speedFactor = 1 + acceleration;
     dx *= speedFactor;
