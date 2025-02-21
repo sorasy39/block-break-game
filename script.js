@@ -6,11 +6,9 @@ const startButton = document.getElementById("startButton");
 // デバイスごとのキャンバスサイズ設定
 function resizeCanvas() {
     if (window.innerWidth > 800) {
-        // PC用（固定サイズ）
         canvas.width = 800;
         canvas.height = 600;
     } else {
-        // スマホ用（画面サイズに適応）
         canvas.width = window.innerWidth * 0.9;
         canvas.height = window.innerHeight * 0.7;
     }
@@ -18,50 +16,48 @@ function resizeCanvas() {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-// ボール設定
-let ballRadius = canvas.width * 0.015; // 画面サイズに依存
-let x, y, dx, dy;
-
-// パドル設定（画面サイズに応じて変化）
-const paddleHeight = 15;
-let paddleWidth = canvas.width * 0.2;
+// ゲーム設定
+let ballRadius, x, y, dx, dy;
+let paddleHeight = 15;
+let paddleWidth;
 let paddleX;
-
-// ゲーム状態
+let rightPressed = false;
+let leftPressed = false;
 let gameOver = false;
 let gameClear = false;
-
-// ブロック設定（PCとスマホで異なるバランス）
-const rowCount = window.innerWidth > 800 ? 6 : 4;
-const columnCount = window.innerWidth > 800 ? 10 : 6;
-const blockWidth = canvas.width / columnCount - 10;
-const blockHeight = 25;
-const blockPadding = 10;
-const blockOffsetTop = 60;
-const blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
-
-let blocks = [];
-
-// ボールの初期速度
 let speed = 4;
 const acceleration = 0.02;
+const maxSpeed = 10;
+
+// ブロック設定
+const rowCount = window.innerWidth > 800 ? 6 : 4;
+const columnCount = window.innerWidth > 800 ? 10 : 6;
+let blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
+let blocks = [];
 
 // 初期化
 function initGame() {
-    resizeCanvas(); // サイズを更新
-    ballRadius = canvas.width * 0.015; // 再計算
-    paddleWidth = canvas.width * 0.2; // パドルサイズも更新
+    resizeCanvas();
+    ballRadius = canvas.width * 0.015;
+    paddleWidth = canvas.width * 0.2;
+    paddleX = (canvas.width - paddleWidth) / 2;
+
     x = canvas.width / 2;
     y = canvas.height - 40;
-
+    speed = 4; // 速度をリセット
     let angle = (Math.random() * 60 + 30) * (Math.PI / 180);
     dx = Math.cos(angle) * speed * (Math.random() < 0.5 ? 1 : -1);
     dy = -Math.sin(angle) * speed;
 
-    paddleX = (canvas.width - paddleWidth) / 2;
     gameOver = false;
     gameClear = false;
     restartButton.style.display = "none";
+
+    blockWidth = canvas.width / columnCount - 10;
+    blockHeight = 25;
+    blockPadding = 10;
+    blockOffsetTop = 60;
+    blockOffsetLeft = (canvas.width - (columnCount * (blockWidth + blockPadding))) / 2;
 
     blocks = [];
     for (let r = 0; r < rowCount; r++) {
@@ -76,18 +72,28 @@ function initGame() {
     }
 }
 
-// スタートボタン
-startButton.addEventListener('click', () => {
-    startButton.style.display = 'none';
-    initGame();
-    draw();
-});
-
 // キーイベント
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
-// タッチ操作（スマホ）
+function keyDownHandler(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+}
+
+function keyUpHandler(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+}
+
+// スムーズなパドル移動
+function movePaddle() {
+    if (rightPressed) paddleX += 7;
+    if (leftPressed) paddleX -= 7;
+    paddleX = Math.max(0, Math.min(canvas.width - paddleWidth, paddleX));
+}
+
+// タッチ操作（スマホ対応）
 canvas.addEventListener("touchmove", function(e) {
     let touchX = e.touches[0].clientX - canvas.offsetLeft;
     if (touchX > 0 && touchX < canvas.width) {
@@ -96,20 +102,7 @@ canvas.addEventListener("touchmove", function(e) {
     e.preventDefault();
 });
 
-// リスタートボタン
-restartButton.addEventListener("click", restartGame);
-
-function keyDownHandler(e) {
-    if (e.key === "Right" || e.key === "ArrowRight") {
-        paddleX += 20;
-    } else if (e.key === "Left" || e.key === "ArrowLeft") {
-        paddleX -= 20;
-    }
-}
-
-function keyUpHandler(e) {}
-
-// パドルの描画
+// パドル描画
 function drawPaddle() {
     ctx.beginPath();
     ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
@@ -118,7 +111,7 @@ function drawPaddle() {
     ctx.closePath();
 }
 
-// ボールの描画
+// ボール描画
 function drawBall() {
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -127,7 +120,7 @@ function drawBall() {
     ctx.closePath();
 }
 
-// ブロックの描画
+// ブロック描画
 function drawBlocks() {
     for (let r = 0; r < rowCount; r++) {
         for (let c = 0; c < columnCount; c++) {
@@ -135,42 +128,43 @@ function drawBlocks() {
                 let b = blocks[r][c];
                 ctx.fillStyle = "#0095DD";
                 ctx.fillRect(b.x, b.y, blockWidth, blockHeight);
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.strokeRect(b.x, b.y, blockWidth, blockHeight);
             }
         }
     }
 }
 
-// ブロックとの衝突判定
+// 衝突判定
 function collisionDetection() {
     for (let r = 0; r < rowCount; r++) {
         for (let c = 0; c < columnCount; c++) {
             let b = blocks[r][c];
-            if (b.status === 1) {
-                if (x > b.x && x < b.x + blockWidth && y > b.y && y < b.y + blockHeight) {
-                    dy = -dy;
-                    b.status = 0;
-                    increaseSpeed();
-                    checkWin();
-                }
+            if (b.status === 1 && x > b.x && x < b.x + blockWidth && y > b.y && y < b.y + blockHeight) {
+                dy = -dy;
+                b.status = 0;
+                increaseSpeed();
+                checkWin();
             }
         }
     }
 }
 
-// 速度アップ
+// 速度アップ（上限あり）
 function increaseSpeed() {
-    let speedFactor = 1 + acceleration;
-    dx *= speedFactor;
-    dy *= speedFactor;
+    if (speed < maxSpeed) {
+        speed *= (1 + acceleration);
+        let angle = Math.atan2(dy, dx);
+        dx = Math.cos(angle) * speed;
+        dy = Math.sin(angle) * speed;
+    }
 }
 
 // クリア判定
 function checkWin() {
     for (let r = 0; r < rowCount; r++) {
         for (let c = 0; c < columnCount; c++) {
-            if (blocks[r][c].status === 1) {
-                return;
-            }
+            if (blocks[r][c].status === 1) return;
         }
     }
     gameClear = true;
@@ -184,7 +178,7 @@ function draw() {
         ctx.fillStyle = "#ff6347";
         ctx.font = "40px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("ゲームオーバー", canvas.width / 2, canvas.height / 2 - 50);
+        ctx.fillText("ゲームオーバー", canvas.width / 2, canvas.height / 2);
         restartButton.style.display = "block";
         return;
     }
@@ -193,7 +187,7 @@ function draw() {
         ctx.fillStyle = "#00ff00";
         ctx.font = "40px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("ゲームクリア！", canvas.width / 2, canvas.height / 2 - 50);
+        ctx.fillText("ゲームクリア！", canvas.width / 2, canvas.height / 2);
         restartButton.style.display = "block";
         return;
     }
@@ -202,6 +196,7 @@ function draw() {
     drawBall();
     drawPaddle();
     collisionDetection();
+    movePaddle();
 
     x += dx;
     y += dy;
@@ -215,8 +210,12 @@ function draw() {
         increaseSpeed();
     } else if (y + dy > canvas.height - ballRadius - paddleHeight) {
         if (x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-            increaseSpeed();
+            let hitPoint = (x - paddleX) / paddleWidth - 0.5;
+            let newAngle = hitPoint * Math.PI / 3;
+            let currentSpeed = Math.sqrt(dx * dx + dy * dy);
+
+            dx = Math.sin(newAngle) * currentSpeed;
+            dy = -Math.cos(newAngle) * currentSpeed;
         } else {
             gameOver = true;
         }
@@ -225,9 +224,5 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
-// リスタート関数
-function restartGame() {
-    restartButton.style.display = 'none';
-    initGame();
-    draw();
-}
+startButton.addEventListener("click", () => { startButton.style.display = 'none'; initGame(); draw(); });
+restartButton.addEventListener("click", () => { restartButton.style.display = 'none'; initGame(); draw(); });
