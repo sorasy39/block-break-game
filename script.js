@@ -54,8 +54,8 @@ function resizeCanvas() {
         canvas.width = 700;
         canvas.height = 500;
     } else {
-        canvas.width = window.innerWidth * 0.9;
-        canvas.height = window.innerHeight * 0.6;
+        canvas.width = window.innerWidth * 0.4;
+        canvas.height = window.innerHeight * 0.3;
     }
 
     // パドルとボールのサイズ
