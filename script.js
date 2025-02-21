@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const restartButton = document.getElementById("restartButton");
@@ -9,8 +10,8 @@ function resizeCanvas() {
         canvas.width = 700; // サイズを少し小さく
         canvas.height = 500; // サイズを少し小さく
     } else {
-        canvas.width = window.innerWidth * 0.6;
-        canvas.height = window.innerHeight * 0.3; // 少し小さく
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.7; // 少し小さく
     }
 }
 window.addEventListener("resize", resizeCanvas);
