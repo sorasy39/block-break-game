@@ -8,7 +8,7 @@ const startButton = document.getElementById("startButton");
 function resizeCanvas() {
     if (window.innerWidth > 800) {
         canvas.width = 700; // サイズを少し小さく
-        canvas.height = 400; // サイズを少し小さく
+        canvas.height = 500; // サイズを少し小さく
     } else {
         canvas.width = window.innerWidth * 0.3;
         canvas.height = window.innerHeight * 0.5; // 少し小さく
