@@ -6,20 +6,25 @@ const startButton = document.getElementById("startButton");
 // デバイスごとのキャンバスサイズ設定
 function resizeCanvas() {
     if (window.innerWidth > 800) {
-        canvas.width = 700; // サイズを少し小さく
-        canvas.height = 500; // サイズを少し小さく
+        canvas.width = 800;
+        canvas.height = 600;
     } else {
-        canvas.width = window.innerWidth * 0.8;
-        canvas.height = window.innerHeight * 0.7; // 少し小さく
+        canvas.width = window.innerWidth * 0.9;
+        canvas.height = window.innerHeight * 0.7;
     }
+    // ボールとパドルサイズの再計算
+    ballRadius = canvas.width * 0.015;
+    paddleHeight = canvas.height * 0.05;
+    paddleWidth = canvas.width * 0.25;
+    paddleX = (canvas.width - paddleWidth) / 2;
 }
+
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 // ゲーム設定
 let ballRadius, x, y, dx, dy;
-let paddleHeight = 12; // パドル高さを少し小さく
-let paddleWidth;
+let paddleHeight, paddleWidth;
 let paddleX;
 let rightPressed = false;
 let leftPressed = false;
@@ -28,12 +33,6 @@ let gameClear = false;
 let speed = 4;
 const acceleration = 0.02;
 const maxSpeed = 10;
-
-// ブロック設定
-const rowCount = window.innerWidth > 800 ? 5 : 4;
-const columnCount = window.innerWidth > 800 ? 8 : 5;
-let blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
-let blocks = [];
 
 // 初期化
 function initGame() {
@@ -71,6 +70,12 @@ function initGame() {
         }
     }
 }
+
+// ブロック設定
+const rowCount = window.innerWidth > 800 ? 5 : 4;
+const columnCount = window.innerWidth > 800 ? 8 : 5;
+let blockWidth, blockHeight, blockPadding, blockOffsetTop, blockOffsetLeft;
+let blocks = [];
 
 // キーイベント
 document.addEventListener("keydown", keyDownHandler, false);
